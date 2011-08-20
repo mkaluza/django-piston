@@ -63,12 +63,13 @@ class Emitter(object):
                             'delete', 'model', 'anonymous',
                             'allowed_methods', 'fields', 'exclude' ])
 
-    def __init__(self, payload, typemapper, handler, fields=(), anonymous=True):
+    def __init__(self, payload, typemapper, handler, fields=(), anonymous=True, total=None):
         self.typemapper = typemapper
         self.data = payload
         self.handler = handler
         self.fields = fields
         self.anonymous = anonymous
+        self.total = total
 
         if isinstance(self.data, Exception):
             raise

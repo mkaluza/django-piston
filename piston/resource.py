@@ -328,7 +328,7 @@ class Resource(object):
                 isinstance(result, list) or isinstance(result, QuerySet)):
             fields = handler.list_fields
 
-        srl = emitter(result, typemapper, handler, fields, anonymous)
+        srl = emitter(result, typemapper, handler, fields, anonymous, total)
 
         try:
             """
