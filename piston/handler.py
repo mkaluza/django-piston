@@ -52,6 +52,9 @@ class BaseHandler(object):
     exclude = ( 'id', )
     fields =  ( )
 
+    def __init__(self):
+        self.pkfield = getattr(self,'pkfield',self.model._meta.pk.name)
+
     def flatten_dict(self, dct):
         return dict([ (str(k), dct.get(k)) for k in dct.keys() ])
 
@@ -81,7 +84,7 @@ class BaseHandler(object):
         if not self.has_model():
             return rc.NOT_IMPLEMENTED
 
-        pkfield = self.model._meta.pk.name
+        pkfield = self.pkfield
 
         if pkfield in kwargs:
             try:
@@ -113,7 +116,7 @@ class BaseHandler(object):
         if not self.has_model():
             return rc.NOT_IMPLEMENTED
 
-        pkfield = self.model._meta.pk.name
+        pkfield = self.pkfield
 
         if pkfield not in kwargs:
             # No pk was specified
