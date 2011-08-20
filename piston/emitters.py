@@ -158,8 +158,8 @@ class Emitter(object):
                 v = lambda f: getattr(data, f.attname)
 
                 if handler:
-                    fields = getattr(handler, 'fields')    
-                
+                    fields = getattr(handler, 'fields')
+
                 if not fields or hasattr(handler, 'fields'):
                     """
                     Fields was not specified, try to find teh correct
@@ -175,7 +175,7 @@ class Emitter(object):
                     if not get_fields:
                         get_fields = set([ f.attname.replace("_id", "", 1)
                             for f in data._meta.fields + data._meta.virtual_fields])
-                    
+
                     if hasattr(mapped, 'extra_fields'):
                         get_fields.update(mapped.extra_fields)
 
