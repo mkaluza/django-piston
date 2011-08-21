@@ -183,8 +183,22 @@ class Resource(object):
             result.content = "Invalid output format specified '%s'." % em_format
             return result
 
+        status_code = 200
+
+        # If we're looking at a response object which contains non-string
+        # content, then assume we should use the emitter to format that
+        # content
+        if isinstance(result, HttpResponse) and not result._is_string:
+            status_code = result.status_code
+            # Note: We can't use result.content here because that method attempts
+            # to convert the content into a string which we don't want.
+            # when _is_string is False _container is the raw data
+            result = result._container
+
+        # Paging
         content_range = None
         total=None
+
         if isinstance(result, QuerySet):
             """
             Limit results based on requested items. This is a based on
@@ -305,25 +319,13 @@ class Resource(object):
                     resp = rc.BAD_RANGE
                     resp.write("\n%s" % e.value)
                     return resp
-
+        #end paging
 
         emitter, ct = Emitter.get(em_format)
         fields = handler.fields
         if hasattr(handler, 'list_fields') and (
                 isinstance(result, list) or isinstance(result, QuerySet)):
             fields = handler.list_fields
-
-        status_code = 200
-
-        # If we're looking at a response object which contains non-string
-        # content, then assume we should use the emitter to format that
-        # content
-        if isinstance(result, HttpResponse) and not result._is_string:
-            status_code = result.status_code
-            # Note: We can't use result.content here because that method attempts
-            # to convert the content into a string which we don't want.
-            # when _is_string is False _container is the raw data
-            result = result._container
 
         srl = emitter(result, typemapper, handler, fields, anonymous)
 
