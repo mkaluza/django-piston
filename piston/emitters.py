@@ -157,10 +157,7 @@ class Emitter(object):
             if handler or fields:
                 v = lambda f: getattr(data, f.attname)
 
-                if handler:
-                    fields = getattr(handler, 'fields')
-
-                if not fields or hasattr(handler, 'fields'):
+                if not fields:
                     """
                     Fields was not specified, try to find teh correct
                     version in the typemapper we were sent.
@@ -247,6 +244,7 @@ class Emitter(object):
                                 ret[maybe_field] = _any(handler_f(data))
 
             else:
+                #neither handler nor fields were given
                 for f in data._meta.fields:
                     ret[f.attname] = _any(getattr(data, f.attname))
 
