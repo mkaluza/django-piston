@@ -313,9 +313,12 @@ class Resource(object):
 
                 try:
                     total = result.count()
-                    start, end = get_range(request_range[0], request_range[1], total)
-                    result = result[start:end + 1]
-                    content_range = "items %i-%i/%i" % (start, end, total)
+		    if total == 0 and request_range[0] == 0:
+                        result =  []	#workaround - if query returned no data and paging starts with 0, it usually means it's just an init value - return empty dataset instead of an error
+                    else:
+                        start, end = get_range(request_range[0], request_range[1], total)
+                        result = result[start:end + 1]
+                        content_range = "items %i-%i/%i" % (start, end, total)
                 except BadRangeException, e:
                     resp = rc.BAD_RANGE
                     resp.write("\n%s" % e.value)
