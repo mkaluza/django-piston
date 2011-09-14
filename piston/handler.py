@@ -21,10 +21,10 @@ class HandlerMetaClass(type):
                     return k
 
         if hasattr(new_cls, 'model'):
-            if already_registered(new_cls.model, new_cls.is_anonymous):
+            handler = already_registered(new_cls.model, new_cls.is_anonymous)
+            if handler:
                 if not getattr(settings, 'PISTON_IGNORE_DUPE_MODELS', False):
-                    warnings.warn("Handler already registered for model %s, "
-                        "you may experience inconsistent results." % new_cls.model.__name__)
+                    warnings.warn("Registering handler %s. Handler %s already registered for model %s, you may experience inconsistent results." % (name, handler.__name__, new_cls.model.__name__))
 
             typemapper[new_cls] = (new_cls.model, new_cls.is_anonymous)
         else:
