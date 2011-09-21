@@ -14,6 +14,7 @@ class HandlerMetaClass(type):
     """
     def __new__(cls, name, bases, attrs):
         new_cls = type.__new__(cls, name, bases, attrs)
+        if not getattr(new_cls,'register',True): return new_cls
 
         def already_registered(model, anon):
             for k, (m, a) in typemapper.iteritems():
