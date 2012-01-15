@@ -104,7 +104,7 @@ class BaseHandler(object):
         attrs = self.flatten_dict(request.data)
 
         try:
-            inst = self.queryset(request).get(**attrs)
+            inst = self.queryset(request).get(pk=kwargs.get(self.pkfield))
             return rc.DUPLICATE_ENTRY
         except self.model.DoesNotExist:
             inst = self.model(**attrs)
@@ -117,14 +117,12 @@ class BaseHandler(object):
         if not self.has_model():
             return rc.NOT_IMPLEMENTED
 
-        pkfield = self.pkfield
-
-        if pkfield not in kwargs:
+        if self.pkfield not in kwargs:
             # No pk was specified
             return rc.BAD_REQUEST
 
         try:
-            inst = self.queryset(request).get(pk=kwargs.get(pkfield))
+            inst = self.queryset(request).get(pk=kwargs.get(self.pkfield))
         except ObjectDoesNotExist:
             return rc.NOT_FOUND
         except MultipleObjectsReturned: # should never happen, since we're using a PK
@@ -141,8 +139,12 @@ class BaseHandler(object):
         if not self.has_model():
             raise NotImplementedError
 
+        if self.pkfield not in kwargs:
+            # No pk was specified
+            return rc.BAD_REQUEST
+
         try:
-            inst = self.queryset(request).get(*args, **kwargs)
+            inst = self.queryset(request).get(pk=kwargs.get(self.pkfield))
 
             inst.delete()
 
