@@ -6,6 +6,7 @@ from django.views.debug import ExceptionReporter
 from django.views.decorators.vary import vary_on_headers
 from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
+from django.db import transaction
 from django.db.models.query import QuerySet
 from django.http import Http404
 
@@ -57,6 +58,21 @@ class Resource(object):
         paging_params = getattr(settings, 'PISTON_PAGINATION_PARAMS', ('offset', 'limit'))
         self.paging_offset = paging_params[0]
         self.paging_limit = paging_params[1]
+
+	def noop(func):
+		def inner_noop(*args, **kwargs):
+			return func(*args, **kwargs)
+		return inner_noop
+
+	self.trans_func = noop
+
+	#TODO allow this to be changed per resource/handler - interpret strings as trans_func
+	#if hasattr(settings, 'EXTPISTON_TRANSACTION_ISOLATION'):
+	fname = getattr(settings, 'EXTPISTON_TRANSACTION_ISOLATION', 'commit_on_success')
+	if hasattr(transaction, fname):
+		self.trans_func = getattr(transaction, fname)
+	else:
+		print "Invalid EXTPISTON_TRANSACTION_ISOLATION value:", fname
 
     def determine_emitter(self, request, *args, **kwargs):
         """
@@ -174,7 +190,8 @@ class Resource(object):
         request = self.cleanup_request(request)
 
         try:
-            result = meth(request, *args, **kwargs)
+            #result = transaction.commit_on_success(meth)(request, *args, **kwargs)
+            result = self.trans_func(meth)(request, *args, **kwargs)
         except Exception, e:
             result = self.error_handler(e, request, meth, em_format)
 
