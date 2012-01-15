@@ -330,12 +330,6 @@ class Resource(object):
                     return resp
         #end paging
 
-        emitter, ct = Emitter.get(em_format)
-        fields = handler.fields
-        if hasattr(handler, 'list_fields') and (
-                isinstance(result, list) or isinstance(result, QuerySet)):
-            fields = handler.list_fields
-
         srl = emitter(result, typemapper, handler, fields, anonymous, total)
 
         try:
