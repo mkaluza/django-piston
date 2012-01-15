@@ -14,7 +14,7 @@ from handler import typemapper
 from doc import HandlerMethod
 from authentication import NoAuthentication
 from utils import coerce_put_post, FormValidationError, HttpStatusCode, BadRangeException
-from utils import rc, format_error, translate_mime, MimerDataException
+from utils import rc, format_error, translate_mime, Mimer, MimerDataException
 
 CHALLENGE = object()
 
@@ -30,6 +30,8 @@ class Resource(object):
                 'PUT': 'update', 'DELETE': 'delete' }
 
     range_re = re.compile("^items=(\d*)-(\d*)$")
+
+    mimer = Mimer
 
     def __init__(self, handler, authentication=None):
         if not callable(handler):
@@ -119,6 +121,9 @@ class Resource(object):
 
         return actor, anonymous
 
+    def translate_mime(self, request):
+        self.mimer(request).translate()
+
     @vary_on_headers('Authorization')
     def __call__(self, request, *args, **kwargs):
         """
@@ -142,7 +147,7 @@ class Resource(object):
         # Translate nested datastructs into `request.data` here.
         if rm in ('POST', 'PUT'):
             try:
-                translate_mime(request)
+                self.translate_mime(request)
             except MimerDataException:
                 return rc.BAD_REQUEST
             if not hasattr(request, 'data'):
